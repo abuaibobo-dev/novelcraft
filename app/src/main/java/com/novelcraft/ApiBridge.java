@@ -64,7 +64,7 @@ final class ApiBridge {
                     JSONObject json = new JSONObject(resp.toString());
                     String content = json.getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content");
                     int usage = json.optJSONObject("usage") != null ? json.getJSONObject("usage").optInt("total_tokens", 0) : 0;
-                    callback("onDeepSeekResult", requestId, content, usage);
+                    callback("onDeepSeekResult", requestId, content.replace("\n", "\\n").replace("\r", ""), String.valueOf(usage));
                 } else {
                     callback("onDeepSeekError", requestId, "API error " + code + ": " + resp.toString());
                 }
