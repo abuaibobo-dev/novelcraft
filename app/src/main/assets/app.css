@@ -1,0 +1,77 @@
+:root{--bg:#0D0D0D;--card:#151515;--border:#222;--text:#E8E8EC;--muted:#6A6A6A;--accent:#8A8A8A}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Noto Serif SC","Source Han Serif",Georgia,serif;overflow:hidden}
+
+.page{display:flex;flex-direction:column;height:100vh;height:100dvh}
+.page.hidden{display:none}
+
+/* === Topbar === */
+.topbar{display:flex;align-items:center;padding:12px 16px;background:rgba(13,13,13,.97);border-bottom:1px solid var(--border);gap:10px;min-height:50px}
+.topbar-title{font-size:15px;font-weight:700;flex:1;font-family:"Noto Sans SC",sans-serif}
+.topbar-btn{background:0;border:0;color:var(--muted);font-size:18px;padding:4px 8px}
+
+/* === Bookshelf === */
+.book-grid{flex:1;overflow-y:auto;padding:16px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;align-content:start}
+.book-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:transform .15s}
+.book-card:active{transform:scale(.97)}
+.book-card .book-name{font-size:14px;font-weight:700;margin-bottom:6px;line-height:1.4}
+.book-card .book-meta{font-size:10px;color:var(--muted)}
+.book-card .book-genre{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--border);font-size:9px;color:var(--accent);margin-top:8px}
+.book-empty{grid-column:1/-1;text-align:center;color:var(--muted);font-size:12px;padding:60px 20px;line-height:1.8}
+.fab{position:fixed;bottom:24px;right:20px;width:52px;height:52px;border-radius:50%;border:0;background:#2A2A2A;color:#fff;font-size:24px;font-weight:300;box-shadow:0 4px 20px rgba(0,0,0,.4);cursor:pointer;z-index:10}
+.fab:active{transform:scale(.92)}
+
+/* === Writing page === */
+.write-area{flex:1;overflow-y:auto;padding:16px;line-height:1.9;font-size:15px}
+.write-area .chapter-heading{font-size:18px;font-weight:700;margin:20px 0 12px;font-family:"Noto Sans SC",sans-serif}
+.write-area .chapter-text{margin-bottom:16px;text-indent:2em}
+.write-area .msg-ai{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin:8px 0;font-size:14px;line-height:1.8}
+.write-area .msg-sys{color:var(--muted);font-size:11px;text-align:center;padding:8px 0}
+.typing{display:flex;gap:4px;padding:8px 0;justify-content:center}
+.typing span{width:5px;height:5px;border-radius:50%;background:var(--muted);animation:bounce .6s infinite alternate}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+
+/* === Input === */
+.write-input-wrap{padding:8px 14px 12px;padding-bottom:max(8px,env(safe-area-inset-bottom));background:rgba(13,13,13,.97);border-top:1px solid var(--border)}
+.write-input-row{display:flex;align-items:flex-end;gap:8px}
+.write-input-box{flex:1;background:#111;border:1px solid var(--border);border-radius:14px;padding:10px 14px;transition:border-color .2s}
+.write-input-box:focus-within{border-color:#555}
+.write-input-box textarea{width:100%;background:0;border:0;color:var(--text);font-size:14px;resize:none;outline:0;line-height:1.45;max-height:120px;font-family:inherit;padding:0}
+.write-input-box textarea::placeholder{color:#555}
+.write-send{width:40px;height:40px;border-radius:50%;border:0;background:#2A2A2A;color:#aaa;font-size:18px;font-weight:700;flex-shrink:0;cursor:pointer}
+.write-send:active{transform:scale(.9)}
+.write-chips{display:flex;gap:6px;margin-top:8px;overflow-x:auto;padding-bottom:2px}
+.chip{padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:10px;white-space:nowrap;cursor:pointer;font-family:"Noto Sans SC",sans-serif}
+.chip:active{background:#1a1a1a;color:#fff}
+
+/* === Settings === */
+.settings-body{flex:1;overflow-y:auto;padding:16px}
+.fold{margin-bottom:10px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--card)}
+.fold-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;font-size:13px;font-weight:600;font-family:"Noto Sans SC",sans-serif}
+.fold-arrow{transition:transform .2s;color:var(--muted);font-size:16px}
+.fold-arrow.open{transform:rotate(90deg)}
+.fold-body{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease;padding:0 16px}
+.fold-body.open{max-height:500px;padding:0 16px 16px}
+label{display:block;color:var(--muted);font-size:11px;margin:10px 0 4px;font-family:"Noto Sans SC",sans-serif}
+input,select{width:100%;padding:10px;background:#0b0b0b;color:var(--text);border:1px solid var(--border);border-radius:8px;outline:none;font-size:12px}
+input:focus,select:focus{border-color:#555}
+.primary{width:100%;margin-top:10px;padding:10px;border:0;border-radius:8px;background:#2A2A2A;color:#fff;font-weight:600;font-size:12px;cursor:pointer}
+.primary:active{opacity:.8}
+
+/* === Toast === */
+.toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-20px);background:#1a1a1a;color:#f4f4f4;border:1px solid #333;border-radius:999px;padding:8px 20px;font-size:12px;font-weight:600;z-index:9999;opacity:0;transition:all .25s ease;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* === Book menu overlay === */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:flex;align-items:center;justify-content:center}
+.overlay-box{background:#111;border:1px solid var(--border);border-radius:16px;padding:24px 20px;max-width:300px;width:90%}
+.overlay-box p{margin:0 0 16px;font-size:13px;text-align:center}
+.overlay-actions{display:flex;gap:10px}
+.overlay-actions button{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:12px;cursor:pointer}
+.overlay-actions .danger{color:#F44336;border-color:#433}
+
+/* === Animations === */
+@keyframes bounce{to{transform:translateY(-4px);opacity:.4}}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
