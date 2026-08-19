@@ -63,15 +63,19 @@ input:focus,select:focus{border-color:#555}
 .toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-20px);background:#1a1a1a;color:#f4f4f4;border:1px solid #333;border-radius:999px;padding:8px 20px;font-size:12px;font-weight:600;z-index:9999;opacity:0;transition:all .25s ease;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* === Book menu overlay === */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:flex;align-items:center;justify-content:center}
-.overlay-box{background:#111;border:1px solid var(--border);border-radius:16px;padding:24px 20px;max-width:300px;width:90%}
-.overlay-box p{margin:0 0 16px;font-size:13px;text-align:center}
-.overlay-actions{display:flex;gap:10px}
-.overlay-actions button{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:12px;cursor:pointer}
-.overlay-actions .danger{color:#F44336;border-color:#433}
+/* === Overlay (rounded popup) === */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;animation:overlayIn .2s ease}
+.overlay-box{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:20px;padding:24px 20px;max-width:320px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.5);animation:boxIn .25s ease}
+.overlay-box p{margin:0 0 16px;font-size:14px;font-weight:600;text-align:center;color:#E8E8EC}
+.overlay-actions{display:flex;gap:10px;margin-top:4px}
+.overlay-actions button{flex:1;padding:11px;border-radius:12px;border:1px solid #2a2a2a;background:#242424;color:#E8E8EC;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s}
+.overlay-actions button:active{background:#333}
+.overlay-actions .danger{color:#F44336;border-color:#3a2020}
+.overlay-actions .danger:active{background:#3a2020}
 
 /* === Animations === */
+@keyframes overlayIn{from{opacity:0}to{opacity:1}}
+@keyframes boxIn{from{opacity:0;transform:scale(.92) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
 @keyframes bounce{to{transform:translateY(-4px);opacity:.4}}
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-thumb{background:#333;border-radius:3px}

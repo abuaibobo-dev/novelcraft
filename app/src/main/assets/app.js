@@ -265,6 +265,7 @@ function showOverlay(title,label,type,placeholder,onConfirm){
     :"<input id='_ov_input' placeholder='"+esc(placeholder)+"' style='width:100%;padding:10px;background:#0b0b0b;color:#E8E8EC;border:1px solid #222;border-radius:8px'>";
   overlay.innerHTML='<div class="overlay-box"><p><b>'+esc(title)+'</b></p><div style="margin-bottom:14px"><label style="color:#6A6A6A;font-size:11px">'+esc(label)+'</label>'+inputHtml+'</div><div class="overlay-actions"><button onclick="this.closest(\'.overlay\').remove()">取消</button><button onclick="var v=document.getElementById(\'_ov_input\').value;this.closest(\'.overlay\').remove();">确定</button></div></div>';
   document.body.appendChild(overlay);
+  overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.remove();});
   overlay.querySelector(".overlay-actions button:last-child").onclick=function(){
     var v=document.getElementById("_ov_input").value;overlay.remove();onConfirm(v);
   };
