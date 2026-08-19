@@ -11,6 +11,7 @@ let currentBook=null;
 let currentChapter=0;
 let writing=false;
 let totalTokens=0;
+let bookPhase="idle"; // idle|consulting|outline|writing
 
 // === Toast ===
 function toast(msg,dur){
@@ -44,13 +45,34 @@ function createBook(){
       var book={id:uid(),name:name.trim(),genre:genre,chapters:[],characters:[],worldbuilding:"",outline:"",createdAt:Date.now()};
       books.push(book);save("books",books);
       toast("✅ 已创建");showWritePage(book);
-      // Auto-generate outline
-      generateOutline(book);
+      startConsultation(book);
     });
   });
 }
 
-function openBook(i){showWritePage(books[i]);}
+function openBook(i){
+  var book=books[i];
+  showWritePage(book);
+  // 如果还没有大纲，进入讨论阶段
+  if(!book.outline||book.outline===""){
+    bookPhase="consulting";
+    updateChips();
+    startConsultation(book);
+  }else{
+    bookPhase="writing";
+  }
+}
+
+function startConsultation(book){
+  bookPhase="consulting";
+  updateChips();
+  var prompt="用户想写一部"+(book.genre||"")+"小说，书名叫《"+book.name+"》。\n\n请你先和用户讨论以下内容，不要直接生成大纲：\n1. 主角设定：名字、年龄、性格、背景、能力\n2. 核心冲突：主角面临的主要矛盾\n3. 世界观：故事发生在什么样的世界\n4. 基调：轻松/严肃/热血/阴暗\n5. 想要的结局走向\n\n用轻松聊天的语气，分点提问，一次不要问太多，先从主角和核心冲突开始。\n\n等用户确认所有设定后，再说：'设定已确认，我来生成大纲'，然后调用 generateOutline。";
+  writing=true;showTyping();
+  callAI(prompt).then(function(resp){
+    hideTyping();writing=false;
+    if(resp){addMsgToArea("ai",resp);}
+  });
+}
 
 function showBookMenu(){
   if(!currentBook)return;
@@ -79,7 +101,12 @@ function exportBook(){
 function renderChapter(){
   var area=$("chapterContent");
   if(!currentBook||!currentBook.chapters||!currentBook.chapters.length){
-    area.innerHTML='<div class="msg-sys">📝 还没有章节<br>告诉 AI 你想写什么，它会自动开始创作</div>';return;}
+    if(bookPhase==="consulting"){
+      area.innerHTML='<div class="msg-sys">💬 正在和 AI 讨论故事设定...<br>请在下方输入你的想法</div>';
+    }else{
+      area.innerHTML='<div class="msg-sys">📝 还没有章节<br>告诉 AI 你想写什么，它会自动开始创作</div>';
+    }
+    return;}
   var ch=currentBook.chapters[currentChapter];
   var html='<div class="chapter-heading">第'+(currentChapter+1)+'章 '+(ch.title||"")+'</div>';
   if(ch.content){ch.content.split("\n").forEach(function(p){if(p.trim())html+='<div class="chapter-text">'+esc(p)+'</div>';});}
@@ -90,27 +117,32 @@ function renderChapter(){
 // === AI Writing Engine ===
 const WRITING_SYSTEM=`你是 NovelCraft AI，一个专业的小说创作助手。你能帮用户创作完整的小说。
 
-你的能力：
-1. 根据一句话灵感生成完整小说大纲
-2. 设计角色（外貌、性格、背景、关系）
-3. 构建世界观（设定、规则、历史）
-4. 逐章生成高质量小说内容
-5. 保持前后文连贯性
-6. 润色和改写文本
+你的工作流程：
+第一阶段（讨论设定）：
+- 先和用户讨论主角设定（名字、年龄、性格、背景、能力）
+- 再讨论核心冲突和故事主线
+- 然后讨论世界观和基调
+- 最后确认结局走向
+- 用轻松聊天的语气，像朋友一样讨论
+- 一次不要问太多问题，分步骤来
+- 等用户确认后，再说"设定已确认，我来生成大纲"
+
+第二阶段（生成大纲）：
+- 根据确认的设定生成 10-15 章大纲
+- 每章有标题和简要情节概述
+
+第三阶段（逐章创作）：
+- 根据大纲逐章生成 2000-3000 字的完整内容
+- 保持前后文连贯
+- 润色和改写文本
 
 写作规则：
-- 每章 2000-3000 字
 - 使用中文写作，文笔优美
 - 对话自然，情节紧凑
 - 保持角色性格一致
 - 章节之间有悬念和转折
 
-输出格式：
-- 生成大纲时：返回 JSON {"action":"outline","data":{...}}
-- 生成章节时：返回 JSON {"action":"chapter","title":"章节标题","content":"章节内容"}
-- 角色设计时：返回 JSON {"action":"characters","data":[...]}
-- 世界观设定时：返回 JSON {"action":"worldbuilding","data":"设定内容"}
-- 润色/改写时：直接返回修改后的文本`;
+重要：在讨论设定阶段，不要直接生成大纲或开始写内容。要一步步和用户确认。`;
 
 function buildMessages(userMsg){
   var msgs=[{role:"system",content:WRITING_SYSTEM}];
@@ -168,10 +200,13 @@ async function generateOutline(book){
     // Create chapter stubs
     if(parsed.chapters){book.chapters=parsed.chapters.map(function(c){return{title:c.title,summary:c.summary,content:""};});}
     save("books",books);currentChapter=0;renderChapter();
-    toast("✅ 大纲已生成");
+    bookPhase="writing";
+    updateChips();
+    toast("✅ 大纲已生成，可以开始创作了");
   }else{
     // Store raw outline
     book.outline=resp;save("books",books);
+    bookPhase="writing";
     toast("✅ 已生成");
   }
 }
@@ -218,7 +253,26 @@ async function sendWrite(){
     // No book yet - create one from prompt
     var book={id:uid(),name:text.slice(0,20),genre:"未分类",chapters:[],characters:[],worldbuilding:"",outline:"",createdAt:Date.now()};
     books.push(book);save("books",books);currentBook=book;$("bookTitle").textContent=book.name;
-    generateOutline(book);return;
+    bookPhase="consulting";
+    updateChips();
+    startConsultation(book);
+    return;
+  }
+  // 咨询阶段：把用户回复发给AI继续讨论
+  if(bookPhase==="consulting"){
+    writing=true;showTyping();
+    var resp=await callAI(text);hideTyping();writing=false;
+    if(resp){
+      addMsgToArea("ai",resp);
+      // 检测AI是否确认设定完成，自动进入大纲阶段
+      if(resp.indexOf("设定已确认")!==-1||resp.indexOf("生成大纲")!==-1){
+        bookPhase="outline";
+        updateChips();
+        toast("📋 正在生成大纲...");
+        setTimeout(function(){generateOutline(currentBook);},500);
+      }
+    }
+    return;
   }
   // Check for commands
   if(text==="继续写"||text==="续写"){generateChapter();return;}
@@ -238,6 +292,14 @@ async function sendWrite(){
   if(resp){addMsgToArea("ai",resp);}
 }
 
+function updateChips(){
+  var chips=$("writeChips");if(!chips)return;
+  if(bookPhase==="consulting"){
+    chips.innerHTML='<button class="chip" onclick="sendCmd(\'确认设定\')">✅ 确认设定</button><button class="chip" onclick="sendCmd(\'换个方向\')">🔄 换个方向</button><button class="chip" onclick="sendCmd(\'再详细说说\')">💬 再详细说说</button>';
+  }else if(bookPhase==="writing"||bookPhase==="outline"){
+    chips.innerHTML='<button class="chip" onclick="sendCmd(\'继续写\')">续写</button><button class="chip" onclick="sendCmd(\'润色这段\')">润色</button><button class="chip" onclick="sendCmd(\'换个写法\')">改写</button><button class="chip" onclick="sendCmd(\'扩写\')">扩写</button>';
+  }
+}
 function sendCmd(cmd){$("writeInput").value=cmd;sendWrite();}
 
 function addMsgToArea(role,text){
