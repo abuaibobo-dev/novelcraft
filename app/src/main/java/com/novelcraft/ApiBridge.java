@@ -105,7 +105,7 @@ final class ApiBridge {
 
                 JSONObject body = new JSONObject();
                 body.put("model", "deepseek-chat");
-                body.put("messages", new JSONArray("[{"role":"user","content":"hi"}]"));
+                body.put("messages", new JSONArray("[{\"role\":\"user\",\"content\":\"hi\"}]"));
                 body.put("max_tokens", 1);
 
                 try (OutputStream os = conn.getOutputStream()) {
