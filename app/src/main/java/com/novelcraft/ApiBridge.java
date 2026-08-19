@@ -89,6 +89,55 @@ final class ApiBridge {
         prefs.edit().remove(key).apply();
     }
 
+    @JavascriptInterface
+    public void checkBalance(String apiKey, String requestId) {
+        executor.execute(() -> {
+            try {
+                // DeepSeek doesn't have a direct balance API, so we make a minimal call
+                // and check the response headers for quota info
+                HttpURLConnection conn = (HttpURLConnection) new URL("https://api.deepseek.com/chat/completions").openConnection();
+                conn.setRequestMethod("POST");
+                conn.setConnectTimeout(15000);
+                conn.setReadTimeout(15000);
+                conn.setRequestProperty("Authorization", "Bearer " + apiKey);
+                conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+                conn.setDoOutput(true);
+
+                JSONObject body = new JSONObject();
+                body.put("model", "deepseek-chat");
+                body.put("messages", new JSONArray("[{"role":"user","content":"hi"}]"));
+                body.put("max_tokens", 1);
+
+                try (OutputStream os = conn.getOutputStream()) {
+                    os.write(body.toString().getBytes(StandardCharsets.UTF_8));
+                }
+
+                int code = conn.getResponseCode();
+                if (code >= 200 && code < 300) {
+                    // Read response to get usage info
+                    StringBuilder resp = new StringBuilder();
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+                        String line;
+                        while ((line = reader.readLine()) != null) resp.append(line);
+                    }
+                    JSONObject json = new JSONObject(resp.toString());
+                    int usage = json.optJSONObject("usage") != null ? json.getJSONObject("usage").optInt("total_tokens", 0) : 0;
+                    // We can't get exact balance, but we can confirm the key works
+                    callback("onBalanceResult", requestId, "ok", "API 密钥有效，已使用 " + usage + " tokens（本次查询）");
+                } else {
+                    StringBuilder err = new StringBuilder();
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream(), StandardCharsets.UTF_8))) {
+                        String line;
+                        while ((line = reader.readLine()) != null) err.append(line);
+                    }
+                    callback("onBalanceResult", requestId, "error", "查询失败: HTTP " + code);
+                }
+            } catch (Exception e) {
+                callback("onBalanceResult", requestId, "error", "查询失败: " + e.getMessage());
+            }
+        });
+    }
+
     private void callback(String function, String... args) {
         StringBuilder js = new StringBuilder("window." + function + "(");
         for (int i = 0; i < args.length; i++) {

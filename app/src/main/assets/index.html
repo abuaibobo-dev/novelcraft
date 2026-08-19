@@ -50,6 +50,11 @@
       <label>模型<select id="cfgModel"><option value="deepseek-chat">深度思考</option><option value="deepseek-v4-flash">快速生成</option></select></label>
       <button class="primary" onclick="saveApiKey()">保存</button>
     </div></div>
+    <div class="fold"><div class="fold-head" onclick="toggleFold(this)"><span>💰 账户信息</span><span class="fold-arrow">›</span></div><div class="fold-body">
+      <div id="balanceInfo" style="color:#6A6A6A;font-size:12px;padding:8px 0">点击下方按钮查询余额</div>
+      <button class="primary" onclick="checkBalance()" style="margin-bottom:10px">🔍 查询余额</button>
+      <a href="https://platform.deepseek.com/topup" target="_blank" style="display:block;text-align:center;padding:10px;border-radius:8px;background:#242424;color:#E8E8EC;text-decoration:none;font-size:12px;font-weight:500;border:1px solid #2a2a2a">💳 前往充值</a>
+    </div></div>
     <div class="fold"><div class="fold-head" onclick="toggleFold(this)"><span>📖 写作偏好</span><span class="fold-arrow">›</span></div><div class="fold-body">
       <label>默认风格<select id="cfgStyle"><option value="玄幻">玄幻</option><option value="科幻">科幻</option><option value="悬疑">悬疑</option><option value="言情">言情</option><option value="都市">都市</option><option value="历史">历史</option><option value="武侠">武侠</option><option value="奇幻">奇幻</option></select></label>
       <label>每章字数<select id="cfgWordCount"><option value="2000">2000字</option><option value="3000" selected>3000字</option><option value="5000">5000字</option></select></label>

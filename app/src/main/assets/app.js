@@ -352,6 +352,26 @@ function toggleFold(el){
   el.querySelector(".fold-arrow").classList.toggle("open");
 }
 
+// === Balance check ===
+function checkBalance(){
+  if(!apiKey){toast("⚠ 请先配置密钥");return;}
+  var info=$("balanceInfo");
+  if(info)info.textContent="⏳ 正在查询...";
+  var requestId=uid();
+  window.onBalanceResult=function(id,status,msg){
+    if(id===requestId){
+      if(info){
+        if(status==="ok"){
+          info.innerHTML='<span style="color:#4CAF50">✅ '+msg+'</span>';
+        }else{
+          info.innerHTML='<span style="color:#F44336">❌ '+msg+'</span>';
+        }
+      }
+    }
+  };
+  NativeApi.checkBalance(apiKey,requestId);
+}
+
 // === Init ===
 function init(){
   apiKey=localStorage.getItem("ds_key")||"";
