@@ -37,7 +37,7 @@ function renderBookshelf(){
 }
 
 function createBook(){
-  if(!apiKey){toast("⚠ 请先在设置中配置 API Key");showSettings();return;}
+  if(!apiKey){toast("⚠ 请先在设置中配置密钥");showSettings();return;}
   showOverlay("创建新书","书名：","text","输入书名...",function(name){
     if(!name.trim())return;
     showOverlay("选择风格","风格：","select","玄幻 科幻 悬疑 言情 都市 历史 武侠 奇幻",function(genre){
@@ -132,7 +132,7 @@ function buildMessages(userMsg){
 }
 
 async function callAI(msg){
-  if(!apiKey){toast("⚠ 请配置 API Key");return null;}
+  if(!apiKey){toast("⚠ 请配置密钥");return null;}
   var requestId=uid();
   return new Promise(function(resolve){
     window.onDeepSeekResult=function(id,content,usage){
@@ -275,7 +275,7 @@ function showOverlay(title,label,type,placeholder,onConfirm){
 function saveApiKey(){
   apiKey=$("cfgApiKey").value.trim();
   model=$("cfgModel").value;
-  if(!apiKey){toast("⚠ 请输入 API Key");return;}
+  if(!apiKey){toast("⚠ 请输入密钥");return;}
   localStorage.setItem("ds_key",apiKey);
   localStorage.setItem("ds_model",model);
   toast("✅ 已保存");
